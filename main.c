@@ -3,6 +3,6 @@
 #include "chapter2/chapter2.h"
 
 int main() {
-    int res = question62_int_shift_are_arithmetic();
-    printf("%d\n", res);
+    int res = xbyte(0xAABBCCDD, 1);
+    printf("%x\n", res);
 }

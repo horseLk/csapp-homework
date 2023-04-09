@@ -7,6 +7,8 @@
 
 #endif //UNTITLED_CHAPTER2_H
 
+typedef unsigned packed_t;
+
 void show_int(int x);
 void show_float(float x);
 void show_pointer(void *x);
@@ -22,3 +24,15 @@ void* question59_generate_word(void* x, void *y);
 unsigned question60_replace_byte(unsigned x, int i, unsigned char b);
 int question61_judge_int(int x);
 int question62_int_shift_are_arithmetic();
+unsigned question63_srl(unsigned x, int k);
+int question63_sra(int x, int k);
+int question64_any_odd_one(unsigned x);
+int question65_odd_ones(unsigned x);
+int question66_leftmost_one(unsigned x);
+int question67_int_size_is_32_B();
+int question67_int_size_is_32_C();
+int question68_lower_one_mask(int n);
+unsigned question69_rotate_left(unsigned x, int n);
+int question70_fits_bits(int x, int n);
+int xbyte(packed_t word, int bytenum);
+void copy_int(int val, void *buf, int maxbytes);
