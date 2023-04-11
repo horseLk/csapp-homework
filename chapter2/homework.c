@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits.h>
 #include "chapter2.h"
 
 void question55_show_pc_byte() {
@@ -177,15 +178,77 @@ int question70_fits_bits(int x, int n) {
 }
 
 
-int xbyte(packed_t word, int bytenum) {
+int question71_xbyte(packed_t word, int bytenum) {
     unsigned x = word >> (bytenum << 3) & 0xFF;
     int m = ((1 << 7) & x) << 1;
     return x - m;
 }
 
 
-void copy_int(int val, void *buf, int maxbytes) {
+void question72_copy_int(int val, void *buf, int maxbytes) {
     if (maxbytes >= (int)sizeof(val)) {
         memcpy(buf, (void*)&val, sizeof(val));
     }
 }
+
+int question73_saturating_add(int x, int y) {
+    int res = x + y;
+
+    // x > 0 && y > 0 && x + y < 0 发生了正溢出
+    int pos_over = !(x & INT_MIN) && !(y & INT_MIN) && (res & INT_MIN);
+    // x < 0, y < 0, x + y > 0 发生了负溢出
+    int neg_over = (x & INT_MIN) && (y && INT_MIN) && !(res & INT_MIN);
+
+    (pos_over && (res = INT_MAX)) || (neg_over && (res = INT_MIN));
+
+    return res;
+}
+
+int question74_tsub_ok(int x, int y) {
+    int res = x - y;
+    // x > 0, y < 0, res < 0 发生了正溢出
+    int pos_over = !(x & INT_MIN) && (y & INT_MIN) && (res & INT_MIN);
+    // x < 0, y > 0, res > 0 发生了负溢出
+    int neg_over = (x & INT_MIN) && !(y & INT_MIN) && !(res & INT_MIN);
+
+    return !(pos_over || neg_over);
+}
+
+// 参书中公式2-18
+// 最后一项除了之后变成了x(w-1)*y(w-1)*2^w，但是结果最多只能表示0~w-1位，所以这项不用考虑，直接当作0处理
+unsigned question75_unsigned_hign_prod(unsigned x, unsigned y) {
+    int signed_prod = singned_high_prod(x, y);
+    int x_sig = x >> 31;
+    int y_sig = y >> 31;
+    return signed_prod + x * y_sig + y * x_sig;
+}
+
+int singned_high_prod(int x, int y) {
+    int64_t mul = (int64_t) x * y;
+    return mul >> 32;
+}
+
+// 可以直接使用除法来验证乘法是否越界
+// 因为越界了肯定是不会得到正确的结果的
+void *question76_myCalloc(size_t nmemb, size_t size) {
+    if (nmemb == 0 || size == 0) {
+        return NULL;
+    }
+    size_t total = nmemb * size;
+    if (total / size == nmemb) {
+        void *p = myMalloc(total);
+        myMemset(p, 0, total);
+        return p;
+    }
+
+    return NULL;
+}
+
+void *myMalloc(size_t size) {
+
+}
+
+void *myMemset(void *s, int c, size_t n) {
+
+}
+
