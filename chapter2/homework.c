@@ -252,3 +252,60 @@ void *myMemset(void *s, int c, size_t n) {
 
 }
 
+int question78_divide_power2(int x, int k) {
+    int neg = x & INT_MIN;
+    (neg && (x = (x + (1 << k) - 1)));
+    return x >> k;
+}
+
+int question79_multi3divi4(int x) {
+    int neg = x & INT_MIN;
+    (neg && (x = (x + 3)));
+    x = x >> 2;
+    return (x << 1) + x;
+}
+
+int question80_threefourths(int x) {
+    int is_neg = x & INT_MIN;
+
+    int f = x & ~0x3;
+    int l = x & 0x3;
+
+    int fd4 = f >> 2;
+    int fd4m3 = (fd4 << 1) + fd4;
+
+    int lm3 = (l << 1) + l;
+    int bias = (1 << 1) + 1;
+    (is_neg && (lm3 += bias));
+    int lm3d4 = lm3 >> 2;
+
+    return fd4m3 + lm3d4;
+}
+
+int question81_A(int k) {
+    int w = sizeof(int) * 8;
+    int l = w - k;
+    int x = 0;
+    (l && (x = INT_MIN >> (w -k - 1)));
+    return x;
+}
+
+int question81_B(int j, int k) {
+    int w = sizeof(int) * 8;
+    int x = 0;
+    k && (x = INT_MIN >> (k - 1));
+    unsigned t = x;
+    t = t >> (w - j - k);
+    return t;
+}
+
+
+int question84_float_le(float x, float y) {
+    unsigned ux = *(unsigned*)&x;
+    unsigned uy = *(unsigned*)&y;
+
+    unsigned sx = ux >> 31;
+    unsigned sy = uy >> 31;
+
+    return (sx && !sy) || ((sx ^ 1) && ux <= uy) || (ux >= uy);
+}

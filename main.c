@@ -4,6 +4,7 @@
 #include "chapter2/chapter2.h"
 
 int main() {
-    int res = singned_high_prod(INT_MAX, 128);
+    int x = INT_MIN;
+    int res = -x;
     printf("%x\n", res);
 }
