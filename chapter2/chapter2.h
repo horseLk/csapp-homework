@@ -8,6 +8,7 @@
 #endif //UNTITLED_CHAPTER2_H
 
 typedef unsigned packed_t;
+typedef unsigned float_bits;
 
 void show_int(int x);
 void show_float(float x);
@@ -49,3 +50,11 @@ int question80_threefourths(int x);
 int question81_A(int k);
 int question81_B(int j, int k);
 int question84_float_le(float x, float y);
+float_bits question92_float_negate(float_bits f);
+float_bits question93_float_absval(float_bits f);
+float_bits question94_float_twice(float_bits f);
+float_bits question95_float_half(float_bits f);
+float_bits question96_float_f2i(float_bits f);
+float_bits question97_float_i2f(int i);
+int bits_length(int i);
+unsigned my_bits_mask(int l);

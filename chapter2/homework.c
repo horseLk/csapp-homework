@@ -309,3 +309,182 @@ int question84_float_le(float x, float y) {
 
     return (sx && !sy) || ((sx ^ 1) && ux <= uy) || (ux >= uy);
 }
+
+float_bits question92_float_negate(float_bits f) {
+    unsigned sign = f >> 31;
+    unsigned exp = f >> 23 & 0xFF;
+    unsigned frac = f & 0x7FFFFF;
+    if (!(exp ^ 0xFF) && frac) {
+        return f;
+    }
+    sign = !sign;
+    return (sign << 31) | (exp << 23) | frac;
+}
+
+float_bits question93_float_absval(float_bits f) {
+    unsigned sign = f >> 31;
+    if (!sign) {
+        return f;
+    }
+
+    unsigned exp = f >> 23 & 0xFF;
+    unsigned frac = f & 0x7FFFFF;
+    if (!(exp ^ 0xFF) && frac) {
+        return f;
+    }
+    sign = 0;
+    return (sign << 31) | (exp << 23) | frac;
+}
+
+float_bits question94_float_twice(float_bits f) {
+    unsigned sign = f >> 31;
+    unsigned exp = f >> 23 & 0xFF;
+    unsigned frac = f & 0x7FFFFF;
+    // 规范化数字
+    if (exp) {
+        exp += 1;
+    } else if (!(frac & 0x3FFFFF)) { // 非规范化数字且frac最左边一位为0
+        frac = frac << 1;
+    } else { // 非规范化数字且frac最左边一位为1, 需要变成规范化
+        // 将exp设置为1
+        // 将frac的最高位设置为0
+        exp = 1;
+        frac = frac & 0x3FFFFF;
+    }
+    return (sign << 31) | (exp << 23) | frac;
+}
+
+float_bits question95_float_half(float_bits f) {
+    unsigned sign = f >> 31;
+    unsigned exp = f >> 23 & 0xFF;
+    unsigned frac = f & 0x7FFFFF;
+    // 非规范化数字
+    if (!exp) {
+        frac = frac >> 1;
+    } else if (!(exp ^ 1)) { // 规范化数字且exp > 1
+        exp = exp - 1;
+    } else { // 规范化数字且exp == 1
+        frac = (frac >> 1) | 0x400000;
+    }
+
+    return (sign << 31) | (exp << 23) | frac;
+}
+
+
+float_bits question96_float_f2i(float_bits f) {
+    unsigned sign = f >> 31;
+    unsigned exp = f >> 23 & 0xFF;
+    unsigned frac = f & 0x7FFFFF;
+    /* Create normalized value with leading one inserted, and rest of significand in bits 8--30.*/
+    unsigned val = 0x80000000u + (frac << 8);
+    if (exp < 127) {
+       /* Absolute value is < 1 */
+       return (int) 0;
+    }
+    if (exp > 158) {
+        /* Overflow */
+        return (int) 0x80000000u;
+    }
+    /* Shift val right */
+    val = val >> (158 - exp);
+    /* Check if out of range */
+    if (sign) {
+        /* Negative */
+        return val > 0x80000000u ? (int) 0x80000000u : -(int) val;
+    } else {
+        /* Positive */
+        return val > 0x7FFFFFFF ? (int) 0x80000000u : (int) val;
+    }
+}
+
+float_bits question97_float_i2f(int i) {
+    unsigned sig, exp, frac, rest, exp_sig /* except sig */, round_part;
+    unsigned bits, fbits;
+    unsigned bias = 0x7F;
+
+    if (i == 0) {
+        sig = 0;
+        exp = 0;
+        frac = 0;
+        return sig << 31 | exp << 23 | frac;
+    }
+    if (i == INT_MIN) {
+        sig = 1;
+        exp = bias + 31;
+        frac = 0;
+        return sig << 31 | exp << 23 | frac;
+    }
+
+    sig = 0;
+    /* 2's complatation */
+    if (i < 0) {
+        sig = 1;
+        i = -i;
+    }
+
+    bits = bits_length(i);
+    fbits = bits - 1;
+    exp = bias + fbits;
+
+    rest = i & my_bits_mask(fbits);
+    if (fbits <= 23) {
+        frac = rest << (23 - fbits);
+        exp_sig = exp << 23 | frac;
+    } else {
+        int offset = fbits - 23;
+        int round_mid = 1 << (offset - 1);
+
+        round_part = rest & my_bits_mask(offset);
+        frac = rest >> offset;
+        exp_sig = exp << 23 | frac;
+
+        /* round to even */
+        if (round_part < round_mid) {
+            /* nothing */
+        } else if (round_part > round_mid) {
+            exp_sig += 1;
+        } else {
+            /* round_part == round_mid */
+            if ((frac & 0x1) == 1) {
+                /* round to even */
+                exp_sig += 1;
+            }
+        }
+    }
+
+    return sig << 31 | exp_sig;
+}
+
+/*
+ * Assume i > 0
+ * calculate i's bit length
+ *
+ * e.g.
+ * 0x3 => 2
+ * 0xFF => 8
+ * 0x80 => 8
+ */
+int bits_length(int i) {
+    if ((i & INT_MIN) != 0) {
+        return 32;
+    }
+
+    unsigned u = (unsigned)i;
+    int length = 0;
+    while (u >= (1<<length)) {
+        length++;
+    }
+    return length;
+}
+
+/*
+ * generate mask
+ * 00000...(32-l) 11111....(l)
+ *
+ * e.g.
+ * 3  => 0x00000007
+ * 16 => 0x0000FFFF
+ */
+unsigned my_bits_mask(int l) {
+    return (unsigned) -1 >> (32-l);
+}
